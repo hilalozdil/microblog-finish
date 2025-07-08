@@ -16,6 +16,39 @@ export default function Register() {
     setIsSubmitting(true);
     setRegisterError('');
 
+//     try {
+//     const response = await fetch('http://localhost:5194/api/auth/register', {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//       },
+//       body: JSON.stringify({
+//         UserName: data.username,
+//         Email: data.email,
+//         Password: data.password,
+//       }),
+//     });
+
+//     if (!response.ok) {
+//       const errorData = await response.json();
+//       setRegisterError(errorData.message || 'Kayıt sırasında bir hata oluştu');
+//       setIsSubmitting(false);
+//       return;
+//     }
+
+//     const result = await response.json();
+//     localStorage.setItem('isLoggedIn', 'true');
+//     localStorage.setItem('user', JSON.stringify(result));
+
+//     navigate('/');
+//   } catch (error) {
+//     console.error('Kayıt hatası:', error);
+//     setRegisterError('Sunucuya bağlanılamadı');
+//   }
+
+//   setIsSubmitting(false);
+// };
+
     // Mevcut kullanıcıları getir
     const existingUsers = JSON.parse(localStorage.getItem('users') || '[]');
 
@@ -210,4 +243,3 @@ export default function Register() {
     
   );
 };
-

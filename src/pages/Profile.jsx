@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Post from '../components/Post';
 import { useNavigate } from 'react-router-dom';
 
@@ -9,15 +9,52 @@ export default function Profile() {
   const [userPosts, setUserPosts] = useState([]);
   const [userReplies, setUserReplies] = useState([]);
   const [userLikedPosts, setUserLikedPosts] = useState([]);
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [title, setTitle] = useState('');
+  const [country, setCountry] = useState('');
+  const dialogRef = useRef(null);
 
   const currentUser = JSON.parse(localStorage.getItem('user'));
   const navigate = useNavigate();
 
+  //Porfil düzenleme-dialog 
+  function handleOpenForm() {
+    dialogRef.current.showModal();
+  }
 
+  function handleCloseForm() {
+    dialogRef.current.close();
+  }
+
+  function handleSaveProfile(e) {
+    e.preventDefault();
+
+    const updatedUser = {
+      ...user,
+      fullName,
+      email,
+      title,
+      country
+    };
+
+    // local storage a kayıt yeni bilgileri
+    setUser(updatedUser);
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+    dialogRef.current.close();
+  }
+
+
+  //localstorage den yeni bilgileri alma
   useEffect(() => {
     const userData = localStorage.getItem('user');
     if (userData) {
-      setUser(JSON.parse(userData));
+      const parsed = JSON.parse(userData);
+      setUser(parsed);
+      setFullName(parsed.fullName || '');
+      setEmail(parsed.email || '');
+      setTitle(parsed.title || 'Frontend Developer | React.js | JavaScript'); // varsayılan
+      setCountry(parsed.country || '');
     }
 
     // Kullanıcının kendi postlarını getir
@@ -49,6 +86,7 @@ export default function Profile() {
       setUserLikedPosts(likedPosts);
     }
   }, []);
+
 
   const handleLogout = () => {
     localStorage.removeItem('isLoggedIn');
@@ -92,7 +130,7 @@ export default function Profile() {
       {/* Profil Başlığı */}
       <div className="border-bottom border-secondary">
         <div className="d-flex align-items-center p-3" onClick={() => navigate('/')}>
-          <button className="btn btn-link text-white me-3">
+          <button className="btn btn-link text-white me-3" >
             <i className="bi bi-arrow-left"></i>
           </button>
           <div>
@@ -111,15 +149,15 @@ export default function Profile() {
             className="rounded-circle me-3"
             style={{ width: '80px', height: '80px' }}
           />
+
+          {/* Profil düzenleyince yeni girilen bilgiler */}
           <div className="flex-grow-1">
             <h4 className="text-white mb-1">{user.fullName || user.username}</h4>
             <p className="text-muted mb-1">@{user.username || 'testuser'}</p>
-            <p className="text-white mb-2">Frontend Developer | React.js | JavaScript</p>
-            <div className="d-flex text-muted small mb-2">
-              <span className="me-3">
-                <i className="bi bi-geo-alt me-1"></i>
-                Tekirdağ, Türkiye
-              </span>
+            <p className="text-white mb-2">{user.title || 'Frontend Developer | React.js | JavaScript'}</p>
+            <p className="text-muted mb-2"><i className="bi bi-geo-alt me-1"></i>{user.country}</p>
+
+            <div className="text-muted small mb-2">
               <span className="me-3">
                 <i className="bi bi-calendar me-1"></i>
                 Katıldı: Ocak 2024
@@ -137,16 +175,56 @@ export default function Profile() {
         </div>
 
         <div className="d-flex gap-2 mb-3">
-          <button className="btn btn-outline-light rounded-pill px-4">
+          <button className="btn btn-outline-light rounded-pill px-4"
+            onClick={handleOpenForm}>
             Profili Düzenle
           </button>
           <button
             className="btn btn-outline-danger rounded-pill px-4"
-            onClick={handleLogout}
+            onClick={() => navigate('/login')}
           >
             Çıkış Yap
           </button>
         </div>
+
+        {/* Profil düzenleme kısmı (dialog ile) */}
+        <dialog ref={dialogRef} >
+          <form onSubmit={handleSaveProfile} className="p-3">
+            <h5>Profil Bilgilerini Düzenle</h5>
+            <input
+              type="text"
+              value={fullName}
+              onChange={e => setFullName(e.target.value)}
+              placeholder="Ad Soyad"
+              className="form-control my-2"
+            />
+            <input
+              type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              placeholder="E-posta"
+              className="form-control my-2"
+            />
+            <input
+              type="text"
+              value={title}
+              onChange={e => setTitle(e.target.value)}
+              placeholder="Başlık (ör: Frontend Dev)"
+              className="form-control my-2"
+            />
+            <input
+              type="text"
+              value={country}
+              onChange={e => setCountry(e.target.value)}
+              placeholder="Ülke"
+              className="form-control my-2"
+            />
+            <div className="d-flex justify-content-end mt-3 gap-2">
+              <button type="button" className="btn btn-secondary" onClick={handleCloseForm}>İptal</button>
+              <button type="submit" className="btn btn-primary">Kaydet</button>
+            </div>
+          </form>
+        </dialog>
       </div>
 
       {/* Tab butonları */}
